@@ -40,6 +40,24 @@ mod tests {
     }
 
     #[test]
+    fn test_debug() {
+        let reading = Reading::new(22625);
+        let debug_output = format!("{:?}", reading);
+        assert!(debug_output.contains("Reading"));
+        assert!(debug_output.contains("22625"));
+    }
+
+    #[test]
+    fn test_partial_eq() {
+        let reading1 = Reading::new(22625);
+        let reading1_again = Reading::new(22625);
+        let reading2 = Reading::new(23000);
+
+        assert_eq!(reading1, reading1_again);
+        assert_ne!(reading1, reading2);
+    }
+
+    #[test]
     fn test_get_temperature() {
         let reading = Reading::new(22625);
         assert_eq!(reading.get_temperature(), 22.625);

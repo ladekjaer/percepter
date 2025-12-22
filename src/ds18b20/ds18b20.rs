@@ -1,5 +1,6 @@
 use crate::ds18b20::reading::Reading;
 
+#[derive(Debug, PartialEq)]
 pub struct DS18B20 {
     sysfs_path: std::path::PathBuf
 }
@@ -72,6 +73,30 @@ mod tests {
         let _device = DS18B20 {
             sysfs_path
         };
+    }
+
+    #[test]
+    fn test_debug() {
+        let sysfs_path = PathBuf::from("/sys/bus/w1/devices/28-000000000000");
+        let device = DS18B20 {
+            sysfs_path: sysfs_path.clone()
+        };
+        let debug_output = format!("{:?}", device);
+        assert!(debug_output.contains("DS18B20"));
+        assert!(debug_output.contains(&format!("{:?}", sysfs_path)));
+    }
+
+    #[test]
+    fn test_partial_eq() {
+        let path1 = PathBuf::from("/sys/bus/w1/devices/28-000000000001");
+        let path2 = PathBuf::from("/sys/bus/w1/devices/28-000000000002");
+        
+        let device1 = DS18B20 { sysfs_path: path1.clone() };
+        let device1_again = DS18B20 { sysfs_path: path1 };
+        let device2 = DS18B20 { sysfs_path: path2 };
+        
+        assert_eq!(device1, device1_again);
+        assert_ne!(device1, device2);
     }
 
     #[test]
