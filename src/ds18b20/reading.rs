@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Formatter;
 
+#[derive(Debug, PartialEq)]
 pub struct Reading {
     // The raw reading from the device is an i32 indicating the temperature in millidegrees Celsius (m°C).
     raw_reading: i32

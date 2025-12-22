@@ -1,3 +1,5 @@
+use crate::ds18b20::reading::Reading;
+
 pub struct DS18B20 {
     sysfs_path: std::path::PathBuf
 }
@@ -12,7 +14,7 @@ impl DS18B20 {
         filename.to_string()
     }
 
-    pub fn read(&self) -> Result<i32, Box<dyn std::error::Error>> {
+    pub fn read(&self) -> Result<Reading, Box<dyn std::error::Error>> {
         let slave_path = self.sysfs_path.join("w1_slave");
         let content = std::fs::read_to_string(slave_path)?;
         
@@ -26,7 +28,8 @@ impl DS18B20 {
             .trim();
         
         let temp = temp_str.parse::<i32>()?;
-        Ok(temp)
+        let reading = Reading::new(temp);
+        Ok(reading)
     }
 
     pub fn get_all() -> Result<Vec<DS18B20>, Box<dyn std::error::Error>> {
@@ -143,7 +146,7 @@ mod tests {
             sysfs_path: device_dir
         };
         let actual = device.read().unwrap();
-        let expected = 22625;
+        let expected = Reading::new(22625);
         assert_eq!(actual, expected);
 
         std::fs::remove_dir_all(&temp_dir).unwrap();
