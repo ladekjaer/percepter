@@ -9,7 +9,7 @@ fn main() {
 }
 
 fn read_all() -> Result<Vec<(String, i32)>, Box<dyn std::error::Error>> {
-    let devices = ds18b20::ds18b20::DS18B20::get_all()?;
+    let devices = ds18b20::DS18B20::get_all()?;
     let mut readings: Vec<(String, i32)> = vec!();
     for device in devices {
         readings.push((device.get_name(), device.read()?));
