@@ -30,7 +30,31 @@ impl DS18B20 {
     }
 
     pub fn get_all() -> Result<Vec<DS18B20>, Box<dyn std::error::Error>> {
-        Ok(vec!())
+        Self::get_all_from_path("/sys/bus/w1/devices/")
+    }
+
+    // Private function implemented as a helper for testing.
+    // Specifying a custom base path for one-wire devices, including DS18B20, unit tests can
+    // easily be written by creating a temporary mock directory with mock DS18B20 devices.
+    fn get_all_from_path<P: AsRef<std::path::Path>>(path: P) -> Result<Vec<DS18B20>, Box<dyn std::error::Error>> {
+        let mut devices = Vec::new();
+        let devices_path = path.as_ref();
+        if !devices_path.exists() {
+            return Ok(devices);
+        }
+
+        for entry in std::fs::read_dir(devices_path)? {
+            let entry = entry?;
+            let path = entry.path();
+            let name = path.file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("");
+            
+            if name.starts_with("28-") {
+                devices.push(DS18B20 { sysfs_path: path });
+            }
+        }
+        Ok(devices)
     }
 }
 
@@ -62,6 +86,48 @@ mod tests {
     fn test_get_all() {
         let devices = DS18B20::get_all();
         assert!(devices.is_ok());
+    }
+
+    #[test]
+    fn test_get_all_empty() {
+        let temp_dir = std::env::temp_dir().join("ds18b20_test_empty");
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        
+        let devices = DS18B20::get_all_from_path(&temp_dir).unwrap();
+        assert_eq!(devices.len(), 0);
+
+        std::fs::remove_dir_all(&temp_dir).unwrap();
+    }
+
+    #[test]
+    fn test_get_all_multiple() {
+        let temp_dir = std::env::temp_dir().join("ds18b20_test_multiple");
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        
+        std::fs::create_dir_all(temp_dir.join("28-000000000001")).unwrap();
+        std::fs::create_dir_all(temp_dir.join("28-000000000002")).unwrap();
+        std::fs::create_dir_all(temp_dir.join("not-a-device")).unwrap();
+        
+        let devices = DS18B20::get_all_from_path(&temp_dir).unwrap();
+        assert_eq!(devices.len(), 2);
+        
+        let names: Vec<String> = devices.iter().map(|d| d.get_name()).collect();
+        assert!(names.contains(&"28-000000000001".to_string()));
+        assert!(names.contains(&"28-000000000002".to_string()));
+
+        std::fs::remove_dir_all(&temp_dir).unwrap();
+    }
+
+    #[test]
+    fn test_get_all_not_exists() {
+        let temp_dir = std::env::temp_dir().join("ds18b20_test_not_exists");
+        // Ensure it doesn't exist
+        if temp_dir.exists() {
+            std::fs::remove_dir_all(&temp_dir).unwrap();
+        }
+        
+        let devices = DS18B20::get_all_from_path(&temp_dir).unwrap();
+        assert_eq!(devices.len(), 0);
     }
 
     #[test]
