@@ -29,7 +29,7 @@ impl DS18B20 {
             .trim();
         
         let temp = temp_str.parse::<i32>()?;
-        let reading = Reading::new(temp);
+        let reading = Reading::new(&self.get_name(),temp);
         Ok(reading)
     }
 
@@ -171,7 +171,7 @@ mod tests {
             sysfs_path: device_dir
         };
         let actual = device.read().unwrap();
-        let expected = Reading::new(22625);
+        let expected = Reading::new(&device.get_name(), 22625);
         assert_eq!(actual, expected);
 
         std::fs::remove_dir_all(&temp_dir).unwrap();

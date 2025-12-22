@@ -6,17 +6,16 @@ fn main() {
     let readings = read_all().unwrap();
 
     for reading in readings {
-        println!("{}: {}", reading.0, reading.1.to_string());
+        println!("{}", reading);
     }
 }
 
-fn read_all() -> Result<Vec<(String, Reading)>, Box<dyn std::error::Error>> {
+fn read_all() -> Result<Vec<Reading>, Box<dyn std::error::Error>> {
     let devices = ds18b20::DS18B20::get_all()?;
-    let mut readings: Vec<(String, Reading)> = vec!();
+    let mut readings: Vec<Reading> = vec!();
     for device in devices {
-        let device_name = device.get_name();
         let reading = device.read()?;
-        readings.push((device_name, reading));
+        readings.push(reading);
     }
 
     Ok(readings)
