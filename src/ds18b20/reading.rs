@@ -9,15 +9,13 @@ pub struct Reading {
 }
 
 impl Reading {
-    pub(crate) fn get_device_name(&self) -> String {
-        self.device_name.clone()
-    }
-}
-
-impl Reading {
     pub(crate) fn new(device_name: &str, raw_reading: i32) -> Self {
         let device_name = device_name.to_string();
         Self { device_name, raw_reading }
+    }
+
+    pub(crate) fn get_device_name(&self) -> String {
+        self.device_name.clone()
     }
 
     /// Returns the temperature in degrees Celsius.
