@@ -1,3 +1,5 @@
+use std::thread;
+use std::time::Duration;
 use clap::Parser;
 use crate::ds18b20::reading::Reading;
 use crate::ds18b20::record::Record;
@@ -7,7 +9,18 @@ mod ds18b20;
 fn main() {
     let args = Args::parse();
 
-    match args.timestamps {
+    if let Some(interval) = args.interval {
+        loop {
+            output_all(args.timestamps);
+            thread::sleep(Duration::from_secs(interval));
+        }
+    } else {
+        output_all(args.timestamps);
+    }
+}
+
+fn output_all(timestamps: bool) {
+    match timestamps {
         true => record_all_to_std_out(),
         false => read_all_to_std_out()
     }
@@ -54,6 +67,9 @@ fn read_all() -> Result<Vec<Reading>, Box<dyn std::error::Error>> {
 #[derive(Debug, Parser)]
 #[command(version, about)]
 struct Args {
+    #[arg(short, long, help = "Interval in seconds for recapture of sensor readings")]
+    interval: Option<u64>,
+
     #[arg(short, long, help = "Include timestamps in output")]
     timestamps: bool,
 }
