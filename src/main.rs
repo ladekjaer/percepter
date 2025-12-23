@@ -73,3 +73,34 @@ struct Args {
     #[arg(short, long, help = "Include timestamps in output")]
     timestamps: bool,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_all() {
+        let _readings = read_all().unwrap();
+    }
+
+    #[test]
+    fn test_read_all_to_std_out() {
+        read_all_to_std_out();
+    }
+
+    #[test]
+    fn test_record_all() {
+        let _records = record_all().unwrap();
+    }
+
+    #[test]
+    fn test_record_all_to_std_out() {
+        record_all_to_std_out();
+    }
+
+    #[test]
+    fn test_output_all() {
+        output_all(false);
+        output_all(true);
+    }
+}
