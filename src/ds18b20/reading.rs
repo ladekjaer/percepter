@@ -18,6 +18,10 @@ impl Reading {
         self.device_name.clone()
     }
 
+    pub(crate) fn get_raw_reading(&self) -> i32 {
+        self.raw_reading
+    }
+
     /// Returns the temperature in degrees Celsius.
     pub fn get_temperature(&self) -> f32 {
         self.raw_reading as f32 / 1000.0
@@ -88,5 +92,11 @@ mod tests {
 
         let reading = Reading::new("28-000000000000", -22625);
         assert_eq!(format!("{}", reading), "28-000000000000: -22.625 °C");
+    }
+    
+    #[test]
+    fn test_get_raw_reading() {
+        let reading = Reading::new("28-000000000000", 22625);
+        assert_eq!(reading.get_raw_reading(), 22625);
     }
 }
