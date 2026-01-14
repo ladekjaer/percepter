@@ -4,6 +4,7 @@ use clap::Parser;
 use crate::ds18b20::reading::Reading;
 use crate::ds18b20::record::Record;
 
+mod bme280;
 mod ds18b20;
 
 fn main() {
@@ -12,11 +13,19 @@ fn main() {
     if let Some(interval) = args.interval {
         loop {
             output_all(args.timestamps);
+            output_bme280_record();
             thread::sleep(Duration::from_secs(interval));
         }
     } else {
         output_all(args.timestamps);
+        output_bme280_record();
     }
+}
+
+fn output_bme280_record() {
+    let mut bme280 = bme280::Device::new();
+    let bme280_record = bme280.record().unwrap();
+    println!("{}", bme280_record);
 }
 
 fn output_all(timestamps: bool) {
