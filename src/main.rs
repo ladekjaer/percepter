@@ -3,20 +3,23 @@ use std::time::Duration;
 use clap::Parser;
 
 mod drivers;
+mod herodot;
 mod reading;
 mod record;
 
 fn main() {
     let args = Args::parse();
 
+    let host: Option<&str> = args.host.as_ref().map(|host| host.as_str());
+
     if let Some(interval) = args.interval {
         loop {
-            output_all(args.timestamps);
+            output_all(args.timestamps, host);
             output_bme280_record();
             thread::sleep(Duration::from_secs(interval));
         }
     } else {
-        output_all(args.timestamps);
+        output_all(args.timestamps, host);
         output_bme280_record();
     }
 }
@@ -27,18 +30,28 @@ fn output_bme280_record() {
     println!("{}", record);
 }
 
-fn output_all(timestamps: bool) {
+fn output_all(timestamps: bool, host: Option<&str>) {
     match timestamps {
-        true => record_all_to_std_out(),
+        true => record_all_to_std_out(host),
         false => read_all_to_std_out()
     }
 }
 
-fn record_all_to_std_out() {
+fn record_all_to_std_out(host: Option<&str>) {
     let records = record_all_ds18b20().unwrap();
 
     for record in records {
         println!("{}", record);
+        match host {
+            Some(host) => {
+                let herodot = herodot::Herodot::new(host.into());
+                match herodot.commit_record(&record) {
+                    Ok(uuid) => println!("Committed record with UUID: {}", uuid),
+                    Err(e) => println!("Failed to commit record: {}", e)
+                }
+            },
+            None => println!("No host specified, skipping commit.")
+        }
     }
 }
 
@@ -80,6 +93,9 @@ struct Args {
 
     #[arg(short, long, help = "Include timestamps in output")]
     timestamps: bool,
+
+    #[arg(long, help = "Herodot server host")]
+    host: Option<String>
 }
 
 #[cfg(test)]
@@ -103,12 +119,12 @@ mod tests {
 
     #[test]
     fn test_record_all_to_std_out() {
-        record_all_to_std_out();
+        record_all_to_std_out(None);
     }
 
     #[test]
     fn test_output_all() {
-        output_all(false);
-        output_all(true);
+        output_all(false, None);
+        output_all(true, None);
     }
 }
