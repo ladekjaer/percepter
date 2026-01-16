@@ -12,15 +12,12 @@ fn main() {
 
     let host: Option<&str> = args.host.as_ref().map(|host| host.as_str());
 
-    if let Some(interval) = args.interval {
-        loop {
-            output_all(args.timestamps, host);
-            output_bme280_record();
-            thread::sleep(Duration::from_secs(interval));
-        }
-    } else {
+    loop {
         output_all(args.timestamps, host);
         output_bme280_record();
+        if let Some(interval) = args.interval {
+            thread::sleep(Duration::from_secs(interval));
+        } else { break }
     }
 }
 
