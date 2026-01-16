@@ -1,11 +1,10 @@
 use std::thread;
 use std::time::Duration;
 use clap::Parser;
-use crate::ds18b20::reading::Reading;
-use crate::ds18b20::record::Record;
 
-mod bme280;
-mod ds18b20;
+mod drivers;
+mod reading;
+mod record;
 
 fn main() {
     let args = Args::parse();
@@ -23,9 +22,9 @@ fn main() {
 }
 
 fn output_bme280_record() {
-    let mut bme280 = bme280::Device::new();
-    let bme280_record = bme280.record().unwrap();
-    println!("{}", bme280_record);
+    let mut bme280 = drivers::bme280::BME280Driver::new();
+    let record = bme280.record().unwrap();
+    println!("{}", record);
 }
 
 fn output_all(timestamps: bool) {
@@ -36,7 +35,7 @@ fn output_all(timestamps: bool) {
 }
 
 fn record_all_to_std_out() {
-    let records = record_all().unwrap();
+    let records = record_all_ds18b20().unwrap();
 
     for record in records {
         println!("{}", record);
@@ -44,16 +43,16 @@ fn record_all_to_std_out() {
 }
 
 fn read_all_to_std_out() {
-    let readings = read_all().unwrap();
+    let readings = read_all_ds18b20().unwrap();
 
     for reading in readings {
         println!("{}", reading);
     }
 }
 
-fn record_all() -> Result<Vec<Record>, Box<dyn std::error::Error>> {
-    let devices = ds18b20::DS18B20::get_all()?;
-    let mut records: Vec<Record> = vec!();
+fn record_all_ds18b20() -> Result<Vec<record::Record>, Box<dyn std::error::Error>> {
+    let devices = drivers::ds18b20::DS18B20::get_all()?;
+    let mut records: Vec<crate::record::Record> = vec!();
     for device in devices {
         let record = device.record()?;
         records.push(record);
@@ -62,9 +61,9 @@ fn record_all() -> Result<Vec<Record>, Box<dyn std::error::Error>> {
     Ok(records)
 }
 
-fn read_all() -> Result<Vec<Reading>, Box<dyn std::error::Error>> {
-    let devices = ds18b20::DS18B20::get_all()?;
-    let mut readings: Vec<Reading> = vec!();
+fn read_all_ds18b20() -> Result<Vec<reading::Reading>, Box<dyn std::error::Error>> {
+    let devices = drivers::ds18b20::DS18B20::get_all()?;
+    let mut readings: Vec<crate::reading::Reading> = vec!();
     for device in devices {
         let reading = device.read()?;
         readings.push(reading);
@@ -89,7 +88,7 @@ mod tests {
 
     #[test]
     fn test_read_all() {
-        let _readings = read_all().unwrap();
+        let _readings = read_all_ds18b20().unwrap();
     }
 
     #[test]
@@ -99,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_record_all() {
-        let _records = record_all().unwrap();
+        let _records = record_all_ds18b20().unwrap();
     }
 
     #[test]
