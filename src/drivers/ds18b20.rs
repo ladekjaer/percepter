@@ -1,8 +1,7 @@
-use crate::reading;
-use crate::reading::Reading;
-use crate::record::Record;
 use chrono::Utc;
 use std::error::Error;
+use rerec::Reading;
+use rerec::record::Record;
 use uuid::Uuid;
 
 #[derive(Debug, PartialEq)]
@@ -35,7 +34,7 @@ impl DS18B20 {
             .trim();
 
         let temp = temp_str.parse::<i32>()?;
-        let reading = reading::ds18b20::DS18B20::new(self.device_name(), temp);
+        let reading = rerec::ds18b20::DS18B20::new(self.device_name(), temp);
         let reading = Reading::DS18B20(reading);
         Ok(reading)
     }
@@ -186,7 +185,7 @@ mod tests {
             sysfs_path: device_dir,
         };
         let actual = device.read().unwrap();
-        let expected = reading::ds18b20::DS18B20::new(device.device_name(), 22625);
+        let expected = rerec::ds18b20::DS18B20::new(device.device_name(), 22625);
         let expected = Reading::DS18B20(expected);
         assert_eq!(actual, expected);
 

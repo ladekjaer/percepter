@@ -1,11 +1,11 @@
 use clap::Parser;
+use rerec::record::Record;
+use rerec::Reading;
 use std::thread;
 use std::time::Duration;
 
 mod drivers;
 mod herodot;
-mod reading;
-mod record;
 
 fn main() {
     let args = Args::parse();
@@ -72,9 +72,9 @@ fn read_all_to_std_out() {
     }
 }
 
-fn record_all_ds18b20() -> Result<Vec<record::Record>, Box<dyn std::error::Error>> {
+fn record_all_ds18b20() -> Result<Vec<Record>, Box<dyn std::error::Error>> {
     let devices = drivers::ds18b20::DS18B20::get_all()?;
-    let mut records: Vec<crate::record::Record> = vec![];
+    let mut records: Vec<Record> = vec![];
     for device in devices {
         let record = device.record()?;
         records.push(record);
@@ -83,9 +83,9 @@ fn record_all_ds18b20() -> Result<Vec<record::Record>, Box<dyn std::error::Error
     Ok(records)
 }
 
-fn read_all_ds18b20() -> Result<Vec<reading::Reading>, Box<dyn std::error::Error>> {
+fn read_all_ds18b20() -> Result<Vec<Reading>, Box<dyn std::error::Error>> {
     let devices = drivers::ds18b20::DS18B20::get_all()?;
-    let mut readings: Vec<crate::reading::Reading> = vec![];
+    let mut readings: Vec<Reading> = vec![];
     for device in devices {
         let reading = device.read()?;
         readings.push(reading);

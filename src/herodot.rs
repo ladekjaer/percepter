@@ -1,6 +1,6 @@
-use crate::record::Record;
 use serde_json::Value;
 use std::error::Error;
+use rerec::record::Record;
 use uuid::Uuid;
 
 pub struct Herodot {
