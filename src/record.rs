@@ -1,19 +1,23 @@
-use std::fmt::Display;
+use crate::reading::Reading;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use uuid::Uuid;
-use crate::reading::Reading;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Record {
     id: Uuid,
     timestamp: DateTime<Utc>,
-    reading: Reading
+    reading: Reading,
 }
 
 impl Record {
     pub fn new(id: Uuid, timestamp: DateTime<Utc>, reading: Reading) -> Self {
-        Self { id, timestamp, reading }
+        Self {
+            id,
+            timestamp,
+            reading,
+        }
     }
 
     pub fn id(&self) -> Uuid {
@@ -40,15 +44,15 @@ impl Display for Record {
 
 #[cfg(test)]
 mod tests {
-    use crate::reading::bme280::BME280;
     use super::*;
+    use crate::reading::bme280::BME280;
 
     #[test]
     fn test_record() {
         let _record = Record {
             id: Uuid::new_v4(),
             timestamp: Utc::now(),
-            reading: Reading::BME280(BME280::new(22.625, 101325.0, 35.0))
+            reading: Reading::BME280(BME280::new(22.625, 101325.0, 35.0)),
         };
     }
 
@@ -99,7 +103,10 @@ mod tests {
         let reading = Reading::BME280(BME280::new(22.625, 101325.0, 35.0));
         let record = Record::new(id, timestamp, reading);
 
-        let expected = format!("[{}] BME280: 22.62 °C, 101325.00 Pa, 35.00% ({})", timestamp, id);
+        let expected = format!(
+            "[{}] BME280: 22.62 °C, 101325.00 Pa, 35.00% ({})",
+            timestamp, id
+        );
         let actual = format!("{}", record);
         assert_eq!(actual, expected);
     }

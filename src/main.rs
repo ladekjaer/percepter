@@ -1,6 +1,6 @@
+use clap::Parser;
 use std::thread;
 use std::time::Duration;
-use clap::Parser;
 
 mod drivers;
 mod herodot;
@@ -17,7 +17,9 @@ fn main() {
         output_bme280_record(host);
         if let Some(interval) = args.interval {
             thread::sleep(Duration::from_secs(interval));
-        } else { break }
+        } else {
+            break;
+        }
     }
 }
 
@@ -29,10 +31,10 @@ fn output_bme280_record(host: Option<&str>) {
             let herodot = herodot::Herodot::new(host.into());
             match herodot.commit_record(&record) {
                 Ok(uuid) => println!("Committed record with UUID: {}", uuid),
-                Err(e) => println!("Failed to commit record: {}", e)
+                Err(e) => println!("Failed to commit record: {}", e),
             }
-        },
-        None => println!("No host specified, skipping commit.")
+        }
+        None => println!("No host specified, skipping commit."),
     }
     println!("{}", record);
 }
@@ -40,7 +42,7 @@ fn output_bme280_record(host: Option<&str>) {
 fn output_all(timestamps: bool, host: Option<&str>) {
     match timestamps {
         true => record_all_to_std_out(host),
-        false => read_all_to_std_out()
+        false => read_all_to_std_out(),
     }
 }
 
@@ -54,10 +56,10 @@ fn record_all_to_std_out(host: Option<&str>) {
                 let herodot = herodot::Herodot::new(host.into());
                 match herodot.commit_record(&record) {
                     Ok(uuid) => println!("Committed record with UUID: {}", uuid),
-                    Err(e) => println!("Failed to commit record: {}", e)
+                    Err(e) => println!("Failed to commit record: {}", e),
                 }
-            },
-            None => println!("No host specified, skipping commit.")
+            }
+            None => println!("No host specified, skipping commit."),
         }
     }
 }
@@ -72,7 +74,7 @@ fn read_all_to_std_out() {
 
 fn record_all_ds18b20() -> Result<Vec<record::Record>, Box<dyn std::error::Error>> {
     let devices = drivers::ds18b20::DS18B20::get_all()?;
-    let mut records: Vec<crate::record::Record> = vec!();
+    let mut records: Vec<crate::record::Record> = vec![];
     for device in devices {
         let record = device.record()?;
         records.push(record);
@@ -83,7 +85,7 @@ fn record_all_ds18b20() -> Result<Vec<record::Record>, Box<dyn std::error::Error
 
 fn read_all_ds18b20() -> Result<Vec<reading::Reading>, Box<dyn std::error::Error>> {
     let devices = drivers::ds18b20::DS18B20::get_all()?;
-    let mut readings: Vec<crate::reading::Reading> = vec!();
+    let mut readings: Vec<crate::reading::Reading> = vec![];
     for device in devices {
         let reading = device.read()?;
         readings.push(reading);
@@ -95,14 +97,18 @@ fn read_all_ds18b20() -> Result<Vec<reading::Reading>, Box<dyn std::error::Error
 #[derive(Debug, Parser)]
 #[command(version, about)]
 struct Args {
-    #[arg(short, long, help = "Interval in seconds for recapture of sensor readings")]
+    #[arg(
+        short,
+        long,
+        help = "Interval in seconds for recapture of sensor readings"
+    )]
     interval: Option<u64>,
 
     #[arg(short, long, help = "Include timestamps in output")]
     timestamps: bool,
 
     #[arg(long, help = "Herodot server host")]
-    host: Option<String>
+    host: Option<String>,
 }
 
 #[cfg(test)]

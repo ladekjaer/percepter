@@ -1,13 +1,13 @@
-use std::error::Error;
-use chrono::Utc;
-use uuid::Uuid;
 use crate::reading;
 use crate::reading::Reading;
 use crate::record::Record;
+use chrono::Utc;
+use std::error::Error;
+use uuid::Uuid;
 
 #[derive(Debug, PartialEq)]
 pub struct DS18B20 {
-    sysfs_path: std::path::PathBuf
+    sysfs_path: std::path::PathBuf,
 }
 
 impl DS18B20 {
@@ -28,7 +28,8 @@ impl DS18B20 {
             return Err("CRC check failed".into());
         }
 
-        let temp_str = content.split("t=")
+        let temp_str = content
+            .split("t=")
             .nth(1)
             .ok_or("Failed to find temperature")?
             .trim();
@@ -63,9 +64,7 @@ impl DS18B20 {
         for device in std::fs::read_dir(devices_path)? {
             let device = device?;
             let path = device.path();
-            let name = path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
 
             if name.starts_with("28-") {
                 devices.push(DS18B20 { sysfs_path: path });
@@ -78,22 +77,20 @@ impl DS18B20 {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn test_ds18b20() {
         let sysfs_path = PathBuf::from("/sys/bus/w1/devices/28-000000000000");
-        let _device = DS18B20 {
-            sysfs_path
-        };
+        let _device = DS18B20 { sysfs_path };
     }
 
     #[test]
     fn test_debug() {
         let sysfs_path = PathBuf::from("/sys/bus/w1/devices/28-000000000000");
         let device = DS18B20 {
-            sysfs_path: sysfs_path.clone()
+            sysfs_path: sysfs_path.clone(),
         };
         let debug_output = format!("{:?}", device);
         assert!(debug_output.contains("DS18B20"));
@@ -105,7 +102,9 @@ mod tests {
         let path1 = PathBuf::from("/sys/bus/w1/devices/28-000000000001");
         let path2 = PathBuf::from("/sys/bus/w1/devices/28-000000000002");
 
-        let device1 = DS18B20 { sysfs_path: path1.clone() };
+        let device1 = DS18B20 {
+            sysfs_path: path1.clone(),
+        };
         let device1_again = DS18B20 { sysfs_path: path1 };
         let device2 = DS18B20 { sysfs_path: path2 };
 
@@ -116,9 +115,7 @@ mod tests {
     #[test]
     fn test_get_name() {
         let sysfs_path = PathBuf::from("/sys/bus/w1/devices/28-000000000000");
-        let device = DS18B20 {
-            sysfs_path
-        };
+        let device = DS18B20 { sysfs_path };
         let actual = device.device_name();
         let expected = "28-000000000000";
         assert_eq!(actual, expected);
@@ -179,10 +176,14 @@ mod tests {
         let device_dir = temp_dir.join("28-000000000000");
         std::fs::create_dir_all(&device_dir).unwrap();
         let slave_file = device_dir.join("w1_slave");
-        std::fs::write(&slave_file, "6a 01 4b 46 7f ff 0c 10 3a : crc=3a YES\n6a 01 4b 46 7f ff 0c 10 3a t=22625\n").unwrap();
+        std::fs::write(
+            &slave_file,
+            "6a 01 4b 46 7f ff 0c 10 3a : crc=3a YES\n6a 01 4b 46 7f ff 0c 10 3a t=22625\n",
+        )
+        .unwrap();
 
         let device = DS18B20 {
-            sysfs_path: device_dir
+            sysfs_path: device_dir,
         };
         let actual = device.read().unwrap();
         let expected = reading::ds18b20::DS18B20::new(device.device_name(), 22625);
@@ -199,10 +200,14 @@ mod tests {
         let device_dir = temp_dir.join("28-000000000000");
         std::fs::create_dir_all(&device_dir).unwrap();
         let slave_file = device_dir.join("w1_slave");
-        std::fs::write(&slave_file, "6a 01 4b 46 7f ff 0c 10 3a : crc=3a NO\n6a 01 4b 46 7f ff 0c 10 3a t=22625\n").unwrap();
+        std::fs::write(
+            &slave_file,
+            "6a 01 4b 46 7f ff 0c 10 3a : crc=3a NO\n6a 01 4b 46 7f ff 0c 10 3a t=22625\n",
+        )
+        .unwrap();
 
         let device = DS18B20 {
-            sysfs_path: device_dir
+            sysfs_path: device_dir,
         };
         let actual = device.read();
         assert!(actual.is_err());

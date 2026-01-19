@@ -1,16 +1,19 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fmt::{Display, Formatter};
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DS18B20 {
     device_name: String,
-    raw_reading: i32
+    raw_reading: i32,
 }
 
 impl DS18B20 {
     pub fn new(device_name: String, raw_reading: i32) -> Self {
-        Self { device_name, raw_reading }
+        Self {
+            device_name,
+            raw_reading,
+        }
     }
 
     pub fn device_name(&self) -> &str {
@@ -40,7 +43,10 @@ mod tests {
 
     #[test]
     fn test_reading() {
-        let _reading = DS18B20 { device_name: "28-000000000000".into(), raw_reading: 22625 };
+        let _reading = DS18B20 {
+            device_name: "28-000000000000".into(),
+            raw_reading: 22625,
+        };
     }
 
     #[test]

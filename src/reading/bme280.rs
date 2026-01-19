@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct BME280 {
@@ -15,7 +15,11 @@ pub struct BME280 {
 
 impl BME280 {
     pub fn new(temperature: f32, pressure: f32, humidity: f32) -> Self {
-        Self { temperature, pressure, humidity }
+        Self {
+            temperature,
+            pressure,
+            humidity,
+        }
     }
 
     pub fn temperature(&self) -> f32 {
@@ -33,7 +37,11 @@ impl BME280 {
 
 impl Display for BME280 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "BME280: {:.2} °C, {:.2} Pa, {:.2}%", self.temperature, self.pressure, self.humidity)
+        write!(
+            f,
+            "BME280: {:.2} °C, {:.2} Pa, {:.2}%",
+            self.temperature, self.pressure, self.humidity
+        )
     }
 }
 
@@ -43,12 +51,16 @@ mod tests {
 
     #[test]
     fn test_reading() {
-        let _reading = BME280 { temperature: 22.625, pressure: 101325.0, humidity: 35.0 };
+        let _reading = BME280 {
+            temperature: 22.625,
+            pressure: 101325.0,
+            humidity: 35.0,
+        };
     }
 
     #[test]
     fn test_new() {
-        let _reading = BME280::new( 22.625, 101325.0, 35.0);
+        let _reading = BME280::new(22.625, 101325.0, 35.0);
     }
 
     #[test]
@@ -72,6 +84,9 @@ mod tests {
     #[test]
     fn test_display() {
         let reading = BME280::new(22.625, 101325.0, 35.0);
-        assert_eq!(format!("{}", reading), "BME280: 22.62 °C, 101325.00 Pa, 35.00%");
+        assert_eq!(
+            format!("{}", reading),
+            "BME280: 22.62 °C, 101325.00 Pa, 35.00%"
+        );
     }
 }

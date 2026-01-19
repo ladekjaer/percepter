@@ -1,6 +1,6 @@
+use crate::reading;
 use crate::reading::Reading;
 use crate::record::Record;
-use crate::reading;
 use bme280::i2c::BME280;
 use linux_embedded_hal::{Delay, I2cdev};
 use uuid::Uuid;
@@ -21,7 +21,8 @@ impl BME280Driver {
 
     pub fn read(&mut self) -> Reading {
         let reading = self.bme280.measure(&mut Delay).unwrap();
-        let reading = reading::bme280::BME280::new(reading.temperature, reading.pressure, reading.humidity);
+        let reading =
+            reading::bme280::BME280::new(reading.temperature, reading.pressure, reading.humidity);
         Reading::BME280(reading)
     }
 
