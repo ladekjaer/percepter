@@ -1022,7 +1022,6 @@ dependencies = [
  "linux-embedded-hal",
  "reqwest",
  "rerec",
- "serde",
  "serde_json",
  "uuid",
 ]
