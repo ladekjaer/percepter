@@ -14,16 +14,26 @@ fn main() {
 
     loop {
         output_all(args.timestamps, host);
-        output_bme280_record();
+        output_bme280_record(host);
         if let Some(interval) = args.interval {
             thread::sleep(Duration::from_secs(interval));
         } else { break }
     }
 }
 
-fn output_bme280_record() {
+fn output_bme280_record(host: Option<&str>) {
     let mut bme280 = drivers::bme280::BME280Driver::new();
     let record = bme280.record().unwrap();
+    match host {
+        Some(host) => {
+            let herodot = herodot::Herodot::new(host.into());
+            match herodot.commit_record(&record) {
+                Ok(uuid) => println!("Committed record with UUID: {}", uuid),
+                Err(e) => println!("Failed to commit record: {}", e)
+            }
+        },
+        None => println!("No host specified, skipping commit.")
+    }
     println!("{}", record);
 }
 
