@@ -43,3 +43,58 @@ Using `&&` ensures that the deployment only happens if the build succeeds.
    3. Enable 1-Wire.
    4. Restart the Raspberry Pi.
 6. Deploy the compiled binary to the Raspberry Pi. As an example, see the single-line compile and deploy above.
+
+Percepter is now simply runnable by
+
+```sh
+./percepters
+```
+
+## Miscellaneous
+
+An easy overview of the Raspberry Pi GPIO pins can be found [Raspberry Pi Pinout](https://pinout.xyz/).
+
+```sh
+# Get the Raspberry Pi serial number
+cat /proc/cpuinfo | grep Serial
+
+# Setting up Raspberry Pi Connect, if not done during the MicroSD card preparation
+rpi-connect on
+rpi-connect signin
+sudo systemctl enable rpi-connect
+
+# List the connected 1-Wire devices
+ ls /sys/bus/w1/devices/
+
+# Detect connected I2C devices
+sudo apt-get install i2c-tools
+sudo i2cdetect -y 1
+
+# Start the interactive Raspberry Pi configuration utility
+sudo raspi-config
+
+# Shutting down or rebooting the Raspberry Pi
+sudo reboot
+sudo shutdown -h
+sudo halt
+
+# See the current kernel version
+uname -a
+
+# Manually add modules for 1-Wire support to the kernel
+sudo modprobe w1-gpio
+sudo modprobe w1-therm
+
+# View service logs, fx for the SSH daemon
+journalctl -u ssh.service
+
+# Manage services, fx
+sudo systemctl start ssh.service
+sudo systemctl stop ssh.service
+
+# Read all connected 1-Wire devices od type DS18B20
+cat /sys/bus/w1/devices/28-*/w1_slave
+
+# See the special boot configuration file
+sudo vi /boot/firmware/config.txt
+```
