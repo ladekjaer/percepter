@@ -27,3 +27,19 @@ cross build --target aarch64-unknown-linux-gnu && scp target/aarch64-unknown-lin
 ```
 
 Using `&&` ensures that the deployment only happens if the build succeeds.
+
+## Preparing a Raspberry Pi
+
+1. Use the official [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to prepare a MicroSD card with the latest version of Raspbian. Use it to set settings for WiFi and time zone. Set up SSH with your public key as authorized. Optionally also configure [Raspberry Pi Connect](https://connect.raspberrypi.com/).
+2. Boot the Raspberry Pi and connect to it via SSH.
+3. Update the system with `sudo apt update && sudo apt upgrade`.
+4. Enable I2C.
+   1. run `sudo raspi-config`.
+   2. Navigate to `Interfacing Options`.
+   3. Enable I2C.
+5. Enable 1-Wire
+   1. run `sudo raspi-config`, to reopen the configuration menu if closed.
+   2. Navigate to `Interfacing Options`.
+   3. Enable 1-Wire.
+   4. Restart the Raspberry Pi.
+6. Deploy the compiled binary to the Raspberry Pi. As an example, see the single-line compile and deploy above.
