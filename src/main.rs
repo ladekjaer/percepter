@@ -11,10 +11,11 @@ fn main() {
     let args = Args::parse();
 
     let host: Option<&str> = args.host.as_ref().map(|host| host.as_str());
+    let auth_token: Option<&str> = args.auth_token.as_ref().map(|auth_token| auth_token.as_str());
 
     loop {
-        output_all(args.timestamps, host);
-        output_bme280_record(host);
+        output_all(args.timestamps, host, auth_token);
+        output_bme280_record(host, auth_token);
         if let Some(interval) = args.interval {
             thread::sleep(Duration::from_secs(interval));
         } else {
@@ -23,12 +24,12 @@ fn main() {
     }
 }
 
-fn output_bme280_record(host: Option<&str>) {
+fn output_bme280_record(host: Option<&str>, auth_token: Option<&str>) {
     let mut bme280 = drivers::bme280::BME280Driver::new();
     let record = bme280.record().unwrap();
     match host {
         Some(host) => {
-            let herodot = herodot::Herodot::new(host.into());
+            let herodot = herodot::Herodot::new(host.into(), auth_token.unwrap().into());
             match herodot.commit_record(&record) {
                 Ok(uuid) => println!("Committed record with UUID: {}", uuid),
                 Err(e) => println!("Failed to commit record: {}", e),
@@ -39,21 +40,21 @@ fn output_bme280_record(host: Option<&str>) {
     println!("{}", record);
 }
 
-fn output_all(timestamps: bool, host: Option<&str>) {
+fn output_all(timestamps: bool, host: Option<&str>, auth_token: Option<&str>) {
     match timestamps {
-        true => record_all_to_std_out(host),
+        true => record_all_to_std_out(host, auth_token),
         false => read_all_to_std_out(),
     }
 }
 
-fn record_all_to_std_out(host: Option<&str>) {
+fn record_all_to_std_out(host: Option<&str>, auth_token: Option<&str>) {
     let records = record_all_ds18b20().unwrap();
 
     for record in records {
         println!("{}", record);
         match host {
             Some(host) => {
-                let herodot = herodot::Herodot::new(host.into());
+                let herodot = herodot::Herodot::new(host.into(), auth_token.unwrap().into());
                 match herodot.commit_record(&record) {
                     Ok(uuid) => println!("Committed record with UUID: {}", uuid),
                     Err(e) => println!("Failed to commit record: {}", e),
@@ -109,6 +110,9 @@ struct Args {
 
     #[arg(long, help = "Herodot server host")]
     host: Option<String>,
+    
+    #[arg(long, help = "Herodot server auth token")]
+    auth_token: Option<String>,
 }
 
 #[cfg(test)]
@@ -132,12 +136,12 @@ mod tests {
 
     #[test]
     fn test_record_all_to_std_out() {
-        record_all_to_std_out(None);
+        record_all_to_std_out(None, None);
     }
 
     #[test]
     fn test_output_all() {
-        output_all(false, None);
-        output_all(true, None);
+        output_all(false, None, None);
+        output_all(true, None, None);
     }
 }
